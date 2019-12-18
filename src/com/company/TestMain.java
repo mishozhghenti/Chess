@@ -7,8 +7,6 @@ import com.whitehatgaming.UserInputFile;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -19,6 +17,7 @@ public class TestMain extends JPanel {
     private Game game;
     private JLabel statusLabel;
     private JLabel[][] boardLabels;
+    private Thread currentGameThread;
 
     public TestMain() {
         frame = new JFrame("Chess");
@@ -64,19 +63,15 @@ public class TestMain extends JPanel {
         JMenu menu = new JMenu("File");
         JMenuItem size = new JMenuItem("Open File");
 
-        size.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home"))); // TODO check on linux
-                int result = fileChooser.showOpenDialog(TestMain.this);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
+        size.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.home"))); // TODO check on linux
+            int result = fileChooser.showOpenDialog(TestMain.this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
 
-                    String selectedFileName = selectedFile.getAbsolutePath();
-                    initGame(selectedFileName);
-//                    System.out.println("Selected file: " + selectedFile.getAbsolutePath());
-                }
+                String selectedFileName = selectedFile.getAbsolutePath();
+                initGame(selectedFileName);
             }
         });
         menu.add(size);
@@ -98,29 +93,10 @@ public class TestMain extends JPanel {
     private void startGame() {
         statusLabel.setText("The Game had been started");
         updateLabel(game.getBoard());
-        new Thread(new GameThread()).start();
+        currentGameThread = new Thread(new GameThread());
+        currentGameThread.start();
     }
 
-
-    private class GameThread implements Runnable {
-        public void run() {
-            while (!game.isGameFinished()) {
-                game.nextGameMove();
-                try {
-                    updateLabel(game.getBoard());
-                    Thread.sleep(DELAY);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    break;
-                }
-            }
-
-            statusLabel.setText("Game Finished: ");
-
-            Thread.currentThread().interrupt();
-        }
-
-    }
 
     private void setUpSize() {
         this.setPreferredSize(new Dimension(Constants.WIDTH, Constants.HEIGHT));
@@ -134,7 +110,7 @@ public class TestMain extends JPanel {
         frame.add(statusPanel, BorderLayout.SOUTH);
         statusPanel.setPreferredSize(new Dimension(frame.getWidth(), 16));
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
-        statusLabel = new JLabel("Status...");
+        statusLabel = new JLabel("Please, Load The Game Data File...");
         statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
         statusPanel.add(statusLabel);
     }
@@ -162,7 +138,23 @@ public class TestMain extends JPanel {
                 isBlack = !isBlack;
             }
         }
+    }
 
+    private class GameThread implements Runnable {
+        public void run() {
+            while (!game.isGameFinished()) {
+                game.nextGameMove();
+                try {
+                    updateLabel(game.getBoard());
+                    Thread.sleep(DELAY);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+            statusLabel.setText("Game Finished: ");
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static void createAndShowGui() {
