@@ -1,7 +1,9 @@
 package com.company;
 
+import com.company.model.Piece;
 import com.whitehatgaming.UserInputFile;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -21,18 +23,28 @@ public class Main extends Application {
     private TextField gameDataFileTexField;
     private Button loadGameDataButton;
     private Label status;
+    private Label[][] boardLabels = new Label[8][8];
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle(GAME_NAME);
         root = new Group();
+
+
         drawChessBoard();
         setUpControllerUI();
         primaryStage.setResizable(false);
-        primaryStage.setScene(new Scene(root, WIDTH, HEIGHT + EXTRA_SPACE_FOR_CONTROLLING));
+        primaryStage.setOnCloseRequest(e -> System.exit(0));
+        primaryStage.setScene(new Scene(root, WIDTH, HEIGHT));
         primaryStage.sizeToScene();
         primaryStage.show();
+    }
+
+    private void updateUICHESS(Piece[][] kk) {
+//        status.setText(String.valueOf(System.currentTimeMillis()));
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAa");
+//        boardLabels[4][4].setText("ASDSAD");
     }
 
 
@@ -50,10 +62,34 @@ public class Main extends Application {
             @Override
             public void handle(MouseEvent event) {
                 try {
-                    game = new Game(new UserInputFile(gameDataFileTexField.getText()), root.getChildren());
+                    game = new Game(new UserInputFile(gameDataFileTexField.getText()));
                     status.setText("File opened");
-                    // new Thread (GameThread)
-                    new Thread(new GameThread()).start();
+
+                    Piece[][] board = game.getBoard();
+                    displayPieces(board);
+//                     new Thread (GameThread)
+//                    Thread.sleep(1000);
+//                    new Thread(new GameThread()).start();
+
+                    Platform.runLater(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              while (!game.isGameFinished()) {
+                                                  game.nextGameMove();
+                                                  try {
+                                                      Piece[][] board = game.getBoard();
+//                    updatePiecesDisplay(board);
+                                                      //       status.setText(String.valueOf(System.currentTimeMillis()));
+
+                                                      Thread.sleep(1000);
+                                                  } catch (InterruptedException e) {
+                                                      e.printStackTrace();
+                                                  }
+                                              }
+                                              Thread.currentThread().interrupt();
+                                          }
+                                      }
+                    );
                 } catch (Exception e) {
                     status.setText("File Reading Error :(");
                 }
@@ -70,12 +106,31 @@ public class Main extends Application {
         root.getChildren().addAll(fileNameLabel, gameDataFileTexField, loadGameDataButton, statusLabel, status);
     }
 
+    private void displayPieces(Piece[][] board) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Piece current = board[i][j];
+                locateLabel((current == null) ? " " : current.getPieceText(), i, j);
+//                System.out.print(((current == null) ? " " : current.getPieceText()) + " ");
+            }
+//            System.out.println("");
+        }
+    }
+
+    private void locateLabel(String s, int i, int j) {
+        Label currentLabel = new Label(s);
+        currentLabel.setLayoutX(i * WIDTH / 8 + 24);
+        currentLabel.setLayoutY(j * HEIGHT / 8 + 24);
+        boardLabels[i][j] = currentLabel;
+        this.root.getChildren().add(currentLabel);
+    }
+
 
     /**
      * Just draws chess board
      */
     private void drawChessBoard() {
-        double squareSize = WIDTH / 8;
+        double squareSize = (double) WIDTH / 8;
         for (int i = 0; i < 8; i++) {
             boolean isBlack = true;
             if (i % 2 == 1) {
@@ -100,17 +155,32 @@ public class Main extends Application {
     private class GameThread implements Runnable {
         public void run() {
             while (!game.isGameFinished()) {
-               // game.nextGameMove();
+                game.nextGameMove();
                 try {
-                    System.out.println("AAA");
-                    Thread.sleep(DELAY);
+                    Piece[][] board = game.getBoard();
+//                    updatePiecesDisplay(board);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
             Thread.currentThread().interrupt();
         }
+
+        private void updatePiecesDisplay(Piece[][] board) {
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    Piece current = board[i][j];
+                    updateLabel((current == null) ? " " : current.getPieceText(), i, j);
+                }
+            }
+        }
+
+        private void updateLabel(String s, int i, int j) {
+            boardLabels[i][j].setText(s);
+        }
     }
+
 
     public static void main(String[] args) {
         launch(args);

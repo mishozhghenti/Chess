@@ -10,8 +10,6 @@ import javafx.scene.control.Label;
 
 import java.io.IOException;
 
-import static com.company.constant.Constants.HEIGHT;
-import static com.company.constant.Constants.WIDTH;
 import static com.company.enums.PieceEnum.*;
 
 public class Game {
@@ -23,11 +21,10 @@ public class Game {
     private Piece[][] board; // for inner logic
     private Label[][] boardLabels; // saves labels for each pieces
 
-    public Game(UserInputFile userInputFile, ObservableList<Node> nodes) {
+    public Game(UserInputFile userInputFile/*, ObservableList<Node> nodes*/) {
         this.userInputFile = userInputFile;
-        this.nodes = nodes;
+//        this.nodes = nodes;
         this.board = new Piece[8][8];
-        this.boardLabels = new Label[8][8];
         setUpPieces();
     }
 
@@ -37,37 +34,130 @@ public class Game {
             if (nextMove == null) {
                 this.isGameFinished = true;
             } else {
-
                 Move move = new Move(nextMove);
+//                System.out.println(move);
+//                System.out.println("from " + move.getMoveFromX() + ":" + move.getMoveFromY() +
+//                        " to " + move.getMoveToX() + ":" + move.getMoveToY());
 
-                try {
-                    validate(board[move.getMoveFromX()][move.getMoveFromY()], move);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//                boolean isValid = validateMove(move);
 
+                commitMove(move);
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void validate(Piece currentPiece, Move move) throws Exception {
-        if (currentPiece == null) {
-            throw new Exception("No Piece On This Cell");
+    private void commitMove(Move move) {
+        // TODO
+        board[move.getMoveToX()][move.getMoveToY()] = board[move.getMoveFromX()][move.getMoveFromY()];
+        board[move.getMoveFromX()][move.getMoveFromY()] = null;
+
+      /*  String pieceName = boardLabels[move.getMoveFromX()][move.getMoveFromY()].getText();
+        boardLabels[move.getMoveFromX()][move.getMoveFromY()].setText(" ");
+        boardLabels[move.getMoveToX()][move.getMoveToY()].setText(pieceName);*/
+    }
+
+
+    private boolean validateMove(Move move) {
+        if (!isInBounds(move)) {
+            return false; // board out of bounds
         }
-        PieceEnum pieceEnum = currentPiece.getPieceEnum();
+
+        Piece currentPiece = board[move.getMoveFromX()][move.getMoveFromY()];
+        if (currentPiece == null) {
+            return false; // No Piece On This Cell
+        }
+        PieceEnum piece = currentPiece.getPieceEnum();
         Piece destination = board[move.getMoveToX()][move.getMoveToY()];
         if (destination != null) { // something is placed on this place
             if (destination.isWhite() == currentPiece.isWhite()) { // on the destination cell is placed the same colored piece
-                throw new Exception("Illegal Move");
+                return false;
             }
         }
 
         boolean isOk = true;
 
+        // TODO just check if the move of direction is correct regarding current board state and regarding the piece ability
+        switch (piece) {
+            case ROOK:
+                isOk = validateRook(currentPiece, move);
+                break;
+            case NIGHT:
+                isOk = validateNight(currentPiece, move);
+                break;
+            case BISHOP:
+                isOk = validateBishop(currentPiece, move);
+                break;
+            case KING:
+                isOk = validateKing(currentPiece, move);
+                break;
+            case QUEEN:
+                isOk = validateQueen(currentPiece, move);
+                break;
+            case PAWN:
+                isOk = validatePawn(currentPiece, move);
+                break;
+        }
+        return isOk;
+    }
+
+
+    private boolean validatePawn(Piece currentPiece, Move move) {
+        if (move.getMoveFromX() != move.getMoveToX()) {
+            return false; // not forward move
+        }
+        boolean isValid = true;
+        if (currentPiece.isWhite()) { // white players
+            if (move.getMoveFromY() == 6) { // if it's first move
+                // its possible to make one or two step long move
+                if (!(move.getMoveFromY() - 1 == move.getMoveToY() ||
+                        move.getMoveFromY() - 2 == move.getMoveToY())) {
+                    isValid = false;
+                }
+            } else {
+                if (!(move.getMoveFromY() - 1 == move.getMoveToY())) {
+                    isValid = false;
+                }
+            }
+        } else { // black players
+            if (move.getMoveFromY() == 1) {
+                if (!(move.getMoveFromY() + 1 == move.getMoveToY() ||
+                        move.getMoveFromY() + 2 == move.getMoveToY())) {
+                    isValid = false;
+                }
+            } else {
+                if (!(move.getMoveFromY() + 1 == move.getMoveToY())) {
+                    isValid = false;
+                }
+            }
+        }
+        return isValid;
+    }
+
+    private boolean validateQueen(Piece currentPiece, Move move) {
+        return false;
+    }
+
+    private boolean validateKing(Piece currentPiece, Move move) {
+        return false;
+    }
+
+    private boolean validateBishop(Piece currentPiece, Move move) {
+        return false;
+    }
+
+    private boolean validateNight(Piece currentPiece, Move move) {
+        return false;
+    }
+
+    private boolean validateRook(Piece currentPiece, Move move) {
+        return false;
+    }
+
+    private boolean isInBounds(Move move) {
+        return (move.getMoveFromX() >= 0 && move.getMoveFromX() < 8 && move.getMoveFromY() >= 0 && move.getMoveFromY() < 8
+                && move.getMoveToX() >= 0 && move.getMoveToX() < 8 && move.getMoveToY() >= 0 && move.getMoveToY() < 8);
     }
 
 
@@ -82,7 +172,6 @@ public class Game {
     private void setUpPieces() {
         setUpWhites();
         setUpBlacks();
-        displayPieces();
     }
 
     private void setUpWhites() {
@@ -114,24 +203,7 @@ public class Game {
     }
 
 
-    private void displayPieces() {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                Piece current = board[j][i];
-                locateLabel((current == null) ? " " : current.getPieceText(), j, i);
-                System.out.print(((current == null) ? " " : current.getPieceText()) + " ");
-            }
-            System.out.println("");
-        }
+    public Piece[][] getBoard() {
+        return board;
     }
-
-    private void locateLabel(String s, int i, int j) {
-        Label currentLabel = new Label(s);
-        currentLabel.setLayoutX(i * WIDTH / 8 + 24);
-        currentLabel.setLayoutY(j * HEIGHT / 8 + 24);
-        boardLabels[i][j] = currentLabel;
-        this.nodes.add(currentLabel);
-    }
-
-
 }

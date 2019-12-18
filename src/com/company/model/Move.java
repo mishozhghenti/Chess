@@ -28,4 +28,9 @@ public class Move {
     public int getMoveToY() {
         return moveToY;
     }
+
+    @Override
+    public String toString() {
+        return "From: " + getMoveFromX() + ":" + getMoveFromY() + " To: " + getMoveToX() + ":" + getMoveToY();
+    }
 }
