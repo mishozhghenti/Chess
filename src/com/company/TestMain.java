@@ -145,8 +145,8 @@ public class TestMain extends JPanel {
             while (!game.isGameFinished()) {
                 game.nextGameMove();
                 try {
-                    updateLabel(game.getBoard());
                     Thread.sleep(DELAY);
+                    updateLabel(game.getBoard());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     break;
