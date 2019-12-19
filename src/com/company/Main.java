@@ -12,14 +12,14 @@ import java.io.FileNotFoundException;
 
 import static com.company.constant.Constants.*;
 
-public class TestMain extends JPanel {
+public class Main extends JPanel {
     private JFrame frame;
     private Game game;
     private JLabel statusLabel;
     private JLabel[][] boardLabels;
     private Thread currentGameThread;
 
-    public TestMain() {
+    public Main() {
         frame = new JFrame("Chess");
         boardLabels = new JLabel[8][8];
         setUpSize();
@@ -66,7 +66,7 @@ public class TestMain extends JPanel {
         size.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-            int result = fileChooser.showOpenDialog(TestMain.this);
+            int result = fileChooser.showOpenDialog(Main.this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
 
@@ -164,7 +164,7 @@ public class TestMain extends JPanel {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new TestMain();
+                new Main();
             }
         });
     }
