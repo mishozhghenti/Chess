@@ -1,43 +1,42 @@
 package com.company;
 
+import com.company.enums.GameStatus;
 import com.company.enums.PieceEnum;
 import com.company.model.Move;
 import com.company.model.Piece;
 import com.whitehatgaming.UserInputFile;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
 
 import java.io.IOException;
 
+import static com.company.enums.GameStatus.NOT_STARTED;
+import static com.company.enums.GameStatus.PLAYING;
 import static com.company.enums.PieceEnum.*;
 
 public class Game {
+    private GameStatus gameStatus;
     private UserInputFile userInputFile;
     private boolean isGameFinished = false;
     private boolean whiteWon = false;
-
-    private ObservableList<Node> nodes;
     private Piece[][] board; // for inner logic
-    private Label[][] boardLabels; // saves labels for each pieces
 
-    public Game(UserInputFile userInputFile/*, ObservableList<Node> nodes*/) {
+    public Game(UserInputFile userInputFile) {
         this.userInputFile = userInputFile;
-//        this.nodes = nodes;
         this.board = new Piece[8][8];
+        this.gameStatus = NOT_STARTED;
         setUpPieces();
     }
 
     public void nextGameMove() {
+        if (gameStatus == NOT_STARTED) {
+            gameStatus = PLAYING;
+        }
+
         try {
             int[] nextMove = this.userInputFile.nextMove();
             if (nextMove == null) {
                 this.isGameFinished = true;
             } else {
                 Move move = new Move(nextMove);
-//                System.out.println(move);
-//                System.out.println("from " + move.getMoveFromX() + ":" + move.getMoveFromY() +
-//                        " to " + move.getMoveToX() + ":" + move.getMoveToY());
 
 //                boolean isValid = validateMove(move);
 
@@ -49,13 +48,8 @@ public class Game {
     }
 
     private void commitMove(Move move) {
-        // TODO
         board[move.getMoveToX()][move.getMoveToY()] = board[move.getMoveFromX()][move.getMoveFromY()];
         board[move.getMoveFromX()][move.getMoveFromY()] = null;
-
-      /*  String pieceName = boardLabels[move.getMoveFromX()][move.getMoveFromY()].getText();
-        boardLabels[move.getMoveFromX()][move.getMoveFromY()].setText(" ");
-        boardLabels[move.getMoveToX()][move.getMoveToY()].setText(pieceName);*/
     }
 
 
@@ -205,5 +199,9 @@ public class Game {
 
     public Piece[][] getBoard() {
         return board;
+    }
+
+    public GameStatus getGameStatus() {
+        return gameStatus;
     }
 }
