@@ -1,7 +1,7 @@
 package com.company.constant;
 
 public class Constants {
-    public static final String GAME_NAME = "CHESS";
+    public static final String GAME_TITLE = "Chess";
     public static final int WIDTH = 480;
     public static final int HEIGHT = 480;
     public static final int SQUARE_SIZE = 60;

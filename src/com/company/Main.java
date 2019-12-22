@@ -20,7 +20,7 @@ public class Main extends JPanel {
     private Thread currentGameThread;
 
     public Main() {
-        frame = new JFrame("Chess");
+        frame = new JFrame(GAME_TITLE);
         boardLabels = new JLabel[8][8];
         setUpSize();
         createStatusBar();
