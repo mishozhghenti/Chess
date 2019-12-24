@@ -64,8 +64,8 @@ public class Utils {
         boolean isValid = true;
         // TODO verify each moves
         switch (piece) {
-            case ROOK:
-                isValid = isValidRookMove(board, move);
+            case PAWN:
+                isValid = isValidPawnMove(board, move);
                 break;
             case NIGHT:
                 isValid = isValidNightMove(board, move);
@@ -73,14 +73,14 @@ public class Utils {
             case BISHOP:
                 isValid = isValidBishopMove(board, move);
                 break;
-            case KING:
-                isValid = isValidKingMove(board, move);
+            case ROOK:
+                isValid = isValidRookMove(board, move);
                 break;
             case QUEEN:
                 isValid = isValidQueenMove(board, move);
                 break;
-            case PAWN:
-                isValid = isValidPawnMove(board, move);
+            case KING:
+                isValid = isValidKingMove(board, move);
                 break;
         }
         return isValid;
