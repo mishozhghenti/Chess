@@ -8,10 +8,6 @@ import static com.company.enums.PieceEnum.*;
 
 public class Utils {
 
-    public static boolean isInBounds(Move move) {
-        return (move.getMoveFromX() >= 0 && move.getMoveFromX() < 8 && move.getMoveFromY() >= 0 && move.getMoveFromY() < 8
-                && move.getMoveToX() >= 0 && move.getMoveToX() < 8 && move.getMoveToY() >= 0 && move.getMoveToY() < 8);
-    }
 
     public static Piece[][] setUpBoard() {
         Piece[][] board = new Piece[8][8];
@@ -48,9 +44,55 @@ public class Utils {
         board[4][0] = new Piece(PieceEnum.KING, false);
     }
 
+    public static boolean validateMove(Piece[][] board, Move move, boolean currentPlayer) {
+        if (!isInBounds(move)) {
+            return false; // board out of bounds
+        }
 
-    public static boolean isForcedByPawn(Piece[][] board, int forcedByX, int forcedByY, int forcedX, int forcedY) {
-        if (!isInBounds(new Move(forcedByX, forcedByY, forcedX, forcedY))) {
+        Piece currentPiece = board[move.getMoveFromX()][move.getMoveFromY()];
+        if (currentPiece == null || currentPiece.isWhite() != currentPlayer) {
+            return false; // [No Piece On This Cell] or [it is not the right players' turn]
+        }
+        Piece destination = board[move.getMoveToX()][move.getMoveToY()];
+        if (destination != null) { // something is placed on this place
+            if (destination.isWhite() == currentPiece.isWhite()) { // on the destination cell is placed the same colored piece
+                return false;
+            }
+        }
+
+        PieceEnum piece = currentPiece.getPieceEnum();
+        boolean isValid = true;
+
+        switch (piece) {
+            case ROOK:
+                isValid = isValidRookMove(board, move);
+                break;
+            case NIGHT:
+                isValid = isValidNightMove(board, move);
+                break;
+            case BISHOP:
+                isValid = isValidBishopMove(board, move);
+                break;
+            case KING:
+                isValid = isValidKingMove(board, move);
+                break;
+            case QUEEN:
+                isValid = isValidQueenMove(board, move);
+                break;
+            case PAWN:
+                isValid = isValidPawnMove(board, move);
+                break;
+        }
+        return isValid;
+    }
+
+    private static boolean isValidPawnMove(Piece[][] board, Move move) {
+        int forcedByX = move.getMoveFromX();
+        int forcedByY = move.getMoveFromY();
+        int forcedX = move.getMoveToX();
+        int forcedY = move.getMoveToY();
+
+        if (!isInBounds(move)) {
             return false;
         }
         Piece pieceForcedBy = board[forcedByX][forcedByY];
@@ -69,8 +111,58 @@ public class Utils {
         }
     }
 
-    public static boolean isForcedByNight(Piece[][] board, int fromX, int fromY, int toX, int toY) {
-        if (!isInBounds(new Move(fromX, fromY, toX, toY))) {
+    private static boolean isValidQueenMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        if (!isInBounds(move)) {
+            return false;
+        }
+        Piece pieceForcedBy = board[fromX][fromY];
+        Piece pieceForced = board[toX][toY];
+        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.QUEEN
+                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
+            return false;
+        }
+        return isBishopObstacleFree(board, move) || isRookObstacleFree(board, move);
+    }
+
+    private static boolean isValidKingMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        if (!isInBounds(move)) {
+            return false;
+        }
+        Piece pieceForcedBy = board[fromX][fromY];
+        Piece pieceForced = board[toX][toY];
+        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.KING
+                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()
+                || pieceForced.getPieceEnum() == PieceEnum.KING) {
+            return false;
+        }
+        return fromX - 1 == toX && fromY - 1 == toY ||
+                fromX == toX && fromY - 1 == toY ||
+                fromX + 1 == toX && fromY - 1 == toY ||
+                fromX + 1 == toX && fromY == toY ||
+                fromX + 1 == toX && fromY + 1 == toY ||
+                fromX == toX && fromY + 1 == toY ||
+                fromX - 1 == toX && fromY + 1 == toY ||
+                fromX - 1 == toX && fromY == toY ||
+                fromX - 1 == toX && fromY - 1 == toY;
+    }
+
+    private static boolean isValidNightMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        if (!isInBounds(move)) {
             return false;
         }
         Piece pieceForcedBy = board[fromX][fromY];
@@ -89,7 +181,50 @@ public class Utils {
                 fromX - 1 == toX && fromY - 2 == toY;
     }
 
-    private static boolean hasObstaclesRookForce(Piece[][] board, int fromX, int fromY, int toX, int toY) {
+    private static boolean isValidRookMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        if (!isInBounds(move)) {
+            return false;
+        }
+
+        Piece pieceForcedBy = board[fromX][fromY];
+        Piece pieceForced = board[toX][toY];
+        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.ROOK
+                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
+            return false;
+        }
+        return isRookObstacleFree(board, move);
+    }
+
+    private static boolean isValidBishopMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        if (!isInBounds(move)) {
+            return false;
+        }
+        Piece pieceForcedBy = board[fromX][fromY];
+        Piece pieceForced = board[toX][toY];
+        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.BISHOP
+                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
+            return false;
+        }
+
+        return isBishopObstacleFree(board, move);
+    }
+
+    private static boolean isRookObstacleFree(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
         if (fromX == toX || fromY == toY) { // on vertical or horizontal line
             // checks fro obstacle between pieces
             if (toX < fromX) {
@@ -123,72 +258,13 @@ public class Utils {
 
     }
 
-    public static boolean isForcedByRook(Piece[][] board, int fromX, int fromY, int toX, int toY) {
-        if (!isInBounds(new Move(fromX, fromY, toX, toY))) {
-            return false;
-        }
 
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.ROOK
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
-        return hasObstaclesRookForce(board, fromX, fromY, toX, toY);
-    }
+    private static boolean isBishopObstacleFree(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
 
-
-    public static boolean isForcedByQueen(Piece[][] board, int fromX, int fromY, int toX, int toY) {
-        if (!isInBounds(new Move(fromX, fromY, toX, toY))) {
-            return false;
-        }
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.QUEEN
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
-        return hasObstaclesBishopForce(board, fromX, fromY, toX, toY) || hasObstaclesRookForce(board, fromX, fromY, toX, toY);
-    }
-
-    public static boolean isForcedByKing(Piece[][] board, int fromX, int fromY, int toX, int toY) {
-        if (!isInBounds(new Move(fromX, fromY, toX, toY))) {
-            return false;
-        }
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.KING
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()
-                || pieceForced.getPieceEnum() == PieceEnum.KING) {
-            return false;
-        }
-        return fromX - 1 == toX && fromY - 1 == toY ||
-                fromX == toX && fromY - 1 == toY ||
-                fromX + 1 == toX && fromY - 1 == toY ||
-                fromX + 1 == toX && fromY == toY ||
-                fromX + 1 == toX && fromY + 1 == toY ||
-                fromX == toX && fromY + 1 == toY ||
-                fromX - 1 == toX && fromY + 1 == toY ||
-                fromX - 1 == toX && fromY == toY ||
-                fromX - 1 == toX && fromY - 1 == toY;
-    }
-
-
-    public static boolean isForcedByBishop(Piece[][] board, int fromX, int fromY, int toX, int toY) {
-        if (!isInBounds(new Move(fromX, fromY, toX, toY))) {
-            return false;
-        }
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.BISHOP
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
-
-        return hasObstaclesBishopForce(board, fromX, fromY, toX, toY);
-    }
-
-    private static boolean hasObstaclesBishopForce(Piece[][] board, int fromX, int fromY, int toX, int toY) {
         if (Math.abs(toX - fromX) == Math.abs(toY - fromY)) { // they are on the same diagonal
             if (toX < fromX && toY < fromY) { // left top diagonal
                 for (int i = toX + 1, j = toY + 1; i < fromX && j < fromY; i++, j++) {
@@ -220,49 +296,9 @@ public class Utils {
         return false;
     }
 
-
-    public static boolean validateMove(Piece[][] board, Move move, boolean nextPlayerTurn) {
-        if (!isInBounds(move)) {
-            return false; // board out of bounds
-        }
-
-        Piece currentPiece = board[move.getMoveFromX()][move.getMoveFromY()];
-        if (currentPiece == null || currentPiece.isWhite() != nextPlayerTurn) {
-            return false; // [No Piece On This Cell] or [it is not the right players' turn]
-        }
-        Piece destination = board[move.getMoveToX()][move.getMoveToY()];
-        if (destination != null) { // something is placed on this place
-            if (destination.isWhite() == currentPiece.isWhite()) { // on the destination cell is placed the same colored piece
-                return false;
-            }
-        }
-
-        PieceEnum piece = currentPiece.getPieceEnum();
-        boolean isOk = true;
-
-        // TODO just check if the move of direction is correct regarding current board state and regarding the piece ability
-      /*  switch (piece) {
-            case ROOK:
-                isOk = validateRook(currentPiece, move);
-                break;
-            case NIGHT:
-                isOk = validateNight(currentPiece, move);
-                break;
-            case BISHOP:
-                isOk = validateBishop(currentPiece, move);
-                break;
-            case KING:
-                isOk = validateKing(currentPiece, move);
-                break;
-            case QUEEN:
-                isOk = validateQueen(currentPiece, move);
-                break;
-            case PAWN:
-                isOk = validatePawn(currentPiece, move);
-                break;
-        }*/
-        return isOk;
+    private static boolean isInBounds(Move move) {
+        return (move.getMoveFromX() >= 0 && move.getMoveFromX() < 8 && move.getMoveFromY() >= 0 && move.getMoveFromY() < 8
+                && move.getMoveToX() >= 0 && move.getMoveToX() < 8 && move.getMoveToY() >= 0 && move.getMoveToY() < 8);
     }
-
 
 }

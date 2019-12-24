@@ -6,8 +6,6 @@ public class Move {
     private int moveToX;
     private int moveToY;
 
-
-
     public Move(int[] nextMove) {
         this.moveFromX = nextMove[0];
         this.moveFromY = nextMove[1];
