@@ -1,8 +1,12 @@
 package com.company.utils;
 
+import com.company.Location;
 import com.company.enums.PieceEnum;
 import com.company.model.Move;
 import com.company.model.Piece;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.company.enums.PieceEnum.*;
 
@@ -62,7 +66,6 @@ public class Utils {
 
         PieceEnum piece = currentPiece.getPieceEnum();
         boolean isValid = true;
-        // TODO verify each moves
         switch (piece) {
             case PAWN:
                 isValid = isValidPawnMove(board, move);
@@ -86,24 +89,381 @@ public class Utils {
         return isValid;
     }
 
-    private static boolean isValidPawnMove(Piece[][] board, Move move) {
-        return false;
+    private static boolean isValidKingMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForKing(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
+    private static boolean isValidPawnMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForPawn(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
+    }
+
+
     private static boolean isValidQueenMove(Piece[][] board, Move move) {
-        return false;
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForRook(board, new Location(fromX, fromY)).contains(new Location(toX, toY)) ||
+                getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidBishopMove(Piece[][] board, Move move) {
-        return false;
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidNightMove(Piece[][] board, Move move) {
-        return false;
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForNight(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidRookMove(Piece[][] board, Move move) {
-        return false;
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForRook(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
+    }
+
+    private static Set<Location> getValidLocationsForKing(Piece[][] board, Location fromLocation) {
+        Set<Location> possibleMoveLocation = new HashSet<>();
+
+        int fromX = fromLocation.getX();
+        int fromY = fromLocation.getY();
+
+        Piece currentPiece = board[fromX][fromY];
+
+        if (fromX - 1 >= 0 && fromY - 1 >= 0) {
+            if (board[fromX - 1][fromY - 1] == null || board[fromX - 1][fromY - 1].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX - 1, fromY - 1));
+            }
+        }
+
+        if (fromY - 1 >= 0) {
+            if (board[fromX][fromY - 1] == null || board[fromX][fromY - 1].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX, fromY - 1));
+            }
+        }
+
+        if (fromX + 1 <= 7 && fromY - 1 >= 0) {
+
+            if (board[fromX + 1][fromY - 1] == null || board[fromX + 1][fromY - 1].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX + 1, fromY - 1));
+            }
+
+        }
+
+        if (fromX + 1 <= 7) {
+            if (board[fromX + 1][fromY] == null || board[fromX + 1][fromY].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX + 1, fromY));
+            }
+        }
+
+        if (fromX + 1 <= 7 && fromY + 1 <= 7) {
+            if (board[fromX + 1][fromY + 1] == null || board[fromX + 1][fromY + 1].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX + 1, fromY + 1));
+            }
+        }
+
+        if (fromY + 1 <= 7) {
+            if (board[fromX][fromY + 1] == null || board[fromX][fromY + 1].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX, fromY + 1));
+            }
+        }
+
+        if (fromX - 1 >= 0 && fromY + 1 <= 7) {
+            if (board[fromX - 1][fromY + 1] == null || board[fromX - 1][fromY - +1].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX - 1, fromY + 1));
+            }
+        }
+
+        if (fromX - 1 >= 0) {
+            if (board[fromX - 1][fromY] == null || board[fromX - 1][fromY].isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX - 1, fromY));
+            }
+        }
+
+        return possibleMoveLocation;
+    }
+
+    private static Set<Location> getValidLocationsForBishop(Piece[][] board, Location fromLocation) {
+        Set<Location> possibleMoveLocation = new HashSet<>();
+
+        int fromX = fromLocation.getX();
+        int fromY = fromLocation.getY();
+
+        Piece currentPiece = board[fromX][fromY];
+        Piece opponentPiece;
+        Location location;
+
+
+        for (int i = fromX - 1, j = fromY - 1; i >= 0 && j >= 0; i--, j--) {
+            opponentPiece = board[i][j];
+            location = new Location(i, j);
+
+            if (opponentPiece != null) {
+                if (opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+
+        for (int i = fromX + 1, j = fromY + 1; i <= 7 && j <= 7; i++, j++) {
+            opponentPiece = board[i][j];
+            location = new Location(i, j);
+            if (opponentPiece != null) {
+                if (opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+
+        for (int i = fromX + 1, j = fromY - 1; i <= 7 && j >= 0; i++, j--) {
+            opponentPiece = board[i][j];
+            location = new Location(i, j);
+            if (opponentPiece != null) {
+                if (opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+
+        for (int i = fromX - 1, j = fromY + 1; i >= 0 && j <= 7; i--, j++) {
+            opponentPiece = board[i][j];
+            location = new Location(i, j);
+            if (opponentPiece != null) {
+                if (opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+        return possibleMoveLocation;
+    }
+
+    private static Set<Location> getValidLocationsForNight(Piece[][] board, Location fromLocation) {
+        Set<Location> possibleMoveLocation = new HashSet<>();
+
+        int fromX = fromLocation.getX();
+        int fromY = fromLocation.getY();
+
+        Piece currentPiece = board[fromX][fromY];
+        Piece opponentPiece;
+
+
+        if (fromX + 1 <= 7 && fromY - 2 >= 0) {
+            opponentPiece = board[fromX + 1][fromY - 2];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX + 1, fromY - 2));
+            }
+        }
+
+
+        if (fromX + 2 <= 7 && fromY - 1 >= 0) {
+            opponentPiece = board[fromX + 2][fromY - 1];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX + 2, fromY - 1));
+            }
+        }
+        if (fromX + 2 <= 7 && fromY + 1 <= 7) {
+            opponentPiece = board[fromX + 2][fromY + 1];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX + 2, fromY + 1));
+            }
+        }
+        if (fromX + 1 <= 7 && fromY + 2 <= 7) {
+            opponentPiece = board[fromX + 1][fromY + 2];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX + 1, fromY + 2));
+            }
+        }
+
+        if (fromX - 1 >= 0 && fromY + 2 <= 7) {
+            opponentPiece = board[fromX - 1][fromY + 2];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX - 1, fromY + 2));
+            }
+        }
+        if (fromX - 2 >= 0 && fromY + 1 <= 7) {
+            opponentPiece = board[fromX - 2][fromY + 1];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX - 2, fromY + 1));
+            }
+        }
+        if (fromX - 2 >= 0 && fromY - 1 >= 0) {
+            opponentPiece = board[fromX - 2][fromY - 1];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX - 2, fromY - 1));
+            }
+        }
+        if (fromX - 1 >= 0 && fromY - 2 >= 0) {
+            opponentPiece = board[fromX - 1][fromY - 2];
+            if (opponentPiece == null || opponentPiece.isWhite() != currentPiece.isWhite()) {
+                possibleMoveLocation.add(new Location(fromX - 1, fromY - 2));
+            }
+        }
+
+        return possibleMoveLocation;
+    }
+
+    private static Set<Location> getValidLocationsForRook(Piece[][] board, Location fromLocation) {
+        Set<Location> possibleMoveLocation = new HashSet<>();
+
+        int fromX = fromLocation.getX();
+        int fromY = fromLocation.getY();
+
+        Piece currentPiece = board[fromX][fromY];
+        Piece piece;
+        Location location;
+
+        for (int i = fromX - 1; i >= 0; i--) {
+            piece = board[i][fromY];
+            location = new Location(i, fromY);
+            if (piece != null) {
+                if (piece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+
+        for (int i = fromX + 1; i <= 7; i++) {
+            piece = board[i][fromY];
+            location = new Location(i, fromY);
+            if (piece != null) {
+                if (piece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+
+        for (int i = fromY - 1; i >= 0; i--) {
+            piece = board[fromX][i];
+            location = new Location(fromX, i);
+
+            if (piece != null) {
+                if (piece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+        for (int i = fromY + 1; i <= 7; i++) {
+            piece = board[fromX][i];
+            location = new Location(fromX, i);
+
+            if (piece != null) {
+                if (piece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(location);
+                }
+                break;
+            }
+            possibleMoveLocation.add(location);
+        }
+
+        return possibleMoveLocation;
+    }
+
+    private static Set<Location> getValidLocationsForPawn(Piece[][] board, Location fromLocation) {
+        Set<Location> possibleMoveLocation = new HashSet<>();
+
+        int fromX = fromLocation.getX();
+        int fromY = fromLocation.getY();
+
+        Piece currentPiece = board[fromX][fromY];
+        Piece opponentPiece;
+
+
+        if (currentPiece.isWhite()) {
+            if (fromY == 6) { // opportunity to change 2 steps forward on the board
+                if (board[fromX][fromY - 1] == null && board[fromX][fromY - 2] == null) {
+                    possibleMoveLocation.add(new Location(fromX, fromY - 2));
+                }
+            } else if (fromY > 0) {// opportunity to change 1 step forward on the board
+                if (board[fromX][fromY - 1] == null) {
+                    possibleMoveLocation.add(new Location(fromX, fromY - 1));
+                }
+            }
+
+            if (fromX - 1 >= 0 && fromY - 1 >= 0) { // forcing
+                opponentPiece = board[fromX - 1][fromY - 1];
+                if (opponentPiece != null && opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(new Location(fromX - 1, fromY - 1));
+                }
+            }
+
+            if (fromX + 1 <= 7 && fromY - 1 >= 0) {
+                opponentPiece = board[fromX + 1][fromY - 1];
+                if (opponentPiece != null && opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(new Location(fromX + 1, fromY - 1));
+                }
+            }
+        } else {
+            if (fromY == 1) {
+                if (board[fromX][fromY + 1] == null && board[fromX][fromY + 2] == null) {
+                    possibleMoveLocation.add(new Location(fromX, fromY + 2));
+                }
+
+            } else if (fromY > 0) {// opportunity to change 1 step forward on the board
+                if (board[fromX][fromY + 1] == null) {
+                    possibleMoveLocation.add(new Location(fromX, fromY + 1));
+                }
+            }
+
+            if (fromX - 1 >= 0 && fromY + 1 <= 7) { // forcing
+                opponentPiece = board[fromX - 1][fromY + 1];
+                if (opponentPiece != null && opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(new Location(fromX - 1, fromY + 1));
+                }
+            }
+
+            if (fromX + 1 <= 7 && fromY + 1 <= 7) {
+                opponentPiece = board[fromX + 1][fromY + 1];
+                if (opponentPiece != null && opponentPiece.isWhite() != currentPiece.isWhite()) {
+                    possibleMoveLocation.add(new Location(fromX + 1, fromY + 1));
+                }
+            }
+
+        }
+        return possibleMoveLocation;
     }
 
 
@@ -123,27 +483,29 @@ public class Utils {
 
     private static boolean isForced(Piece[][] board, Move move) {
         PieceEnum otherPlayerPiece = board[move.getMoveFromX()][move.getMoveFromY()].getPieceEnum();
-        boolean isCheck = false;
+        boolean isForced = false;
         switch (otherPlayerPiece) {
+            case PAWN:
+                isForced = isForcedByPawn(board, move);
+                break;
             case ROOK:
-                isCheck = isForcedByRook(board, move);
+                isForced = isForcedByRook(board, move);
                 break;
             case NIGHT:
-                isCheck = isForcedByNight(board, move);
+                isForced = isForcedByNight(board, move);
                 break;
             case BISHOP:
-                isCheck = isForcedByBishop(board, move);
-                break;
-            case PAWN:
-                isCheck = isForcedByPawn(board, move);
+                isForced = isForcedByBishop(board, move);
                 break;
             case QUEEN:
-                isCheck = isForcedByQueen(board, move);
+                isForced = isForcedByQueen(board, move);
+                break;
+            case KING:
+                isForced = isForcedByKing(board, move);
                 break;
         }
-        return isCheck;
+        return isForced;
     }
-
 
     private static boolean isForcedByPawn(Piece[][] board, Move move) {
         int fromX = move.getMoveFromX();
@@ -167,6 +529,58 @@ public class Utils {
         }
     }
 
+    private static boolean isForcedByRook(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        Piece pieceForcedBy = board[fromX][fromY];
+        Piece pieceForced = board[toX][toY];
+        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.ROOK
+                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
+            return false;
+        }
+        return isRookObstacleFree(board, move);
+    }
+
+    private static boolean isForcedByNight(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+        Piece pieceForcedBy = board[fromX][fromY];
+        Piece pieceForced = board[toX][toY];
+        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.NIGHT
+                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
+            return false;
+        }
+        return fromX + 1 == toX && fromY - 2 == toY ||
+                fromX + 2 == toX && fromY - 1 == toY ||
+                fromX + 2 == toX && fromY + 1 == toY ||
+                fromX + 1 == toX && fromY + 2 == toY ||
+                fromX - 1 == toX && fromY + 2 == toY ||
+                fromX - 2 == toX && fromY + 1 == toY ||
+                fromX - 2 == toX && fromY - 1 == toY ||
+                fromX - 1 == toX && fromY - 2 == toY;
+    }
+
+    private static boolean isForcedByBishop(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        Piece pieceForcedBy = board[fromX][fromY];
+        Piece pieceForced = board[toX][toY];
+        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.BISHOP
+                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
+            return false;
+        }
+
+        return isBishopObstacleFree(board, move);
+    }
+
     private static boolean isForcedByQueen(Piece[][] board, Move move) {
         int fromX = move.getMoveFromX();
         int fromY = move.getMoveFromY();
@@ -182,7 +596,7 @@ public class Utils {
         return isBishopObstacleFree(board, move) || isRookObstacleFree(board, move);
     }
 
-    private static boolean isValidKingMove(Piece[][] board, Move move) {
+    private static boolean isForcedByKing(Piece[][] board, Move move) {
         if (!isInBounds(move)) {
             return false;
         }
@@ -207,58 +621,6 @@ public class Utils {
                 fromX - 1 == toX && fromY + 1 == toY ||
                 fromX - 1 == toX && fromY == toY ||
                 fromX - 1 == toX && fromY - 1 == toY;
-    }
-
-    private static boolean isForcedByNight(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.NIGHT
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
-        return fromX + 1 == toX && fromY - 2 == toY ||
-                fromX + 2 == toX && fromY - 1 == toY ||
-                fromX + 2 == toX && fromY + 1 == toY ||
-                fromX + 1 == toX && fromY + 2 == toY ||
-                fromX - 1 == toX && fromY + 2 == toY ||
-                fromX - 2 == toX && fromY + 1 == toY ||
-                fromX - 2 == toX && fromY - 1 == toY ||
-                fromX - 1 == toX && fromY - 2 == toY;
-    }
-
-    private static boolean isForcedByRook(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.ROOK
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
-        return isRookObstacleFree(board, move);
-    }
-
-    private static boolean isForcedByBishop(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.BISHOP
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
-
-        return isBishopObstacleFree(board, move);
     }
 
     private static boolean isRookObstacleFree(Piece[][] board, Move move) {
@@ -298,7 +660,6 @@ public class Utils {
         }
         return false;
     }
-
 
     private static boolean isBishopObstacleFree(Piece[][] board, Move move) {
         int fromX = move.getMoveFromX();
