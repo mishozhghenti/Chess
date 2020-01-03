@@ -40,6 +40,7 @@ public class Game {
 
                 boolean isValid = Utils.validateMove(board, move, nextPlayerTurn);
                 commitMove(move);
+                boolean isCheck = isCheck();
 
                 nextPlayerTurn = !nextPlayerTurn;
             }
@@ -47,6 +48,12 @@ public class Game {
             e.printStackTrace();
         }
     }
+
+    private boolean isCheck() {
+        // TODO
+        return false;
+    }
+
 
     private void commitMove(Move move) {
         board[move.getMoveToX()][move.getMoveToY()] = board[move.getMoveFromX()][move.getMoveFromY()];

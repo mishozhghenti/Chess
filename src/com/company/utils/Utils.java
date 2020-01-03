@@ -1,7 +1,7 @@
 package com.company.utils;
 
-import com.company.Location;
 import com.company.enums.PieceEnum;
+import com.company.model.Location;
 import com.company.model.Move;
 import com.company.model.Piece;
 
@@ -20,42 +20,15 @@ public class Utils {
         return board;
     }
 
-    private static void setUpWhites(Piece[][] board) {
-        for (int i = 0; i < 8; i++) {
-            board[i][6] = new Piece(PieceEnum.PAWN, true);
-        }
-        board[0][7] = new Piece(ROOK, true);
-        board[7][7] = new Piece(ROOK, true);
-        board[1][7] = new Piece(NIGHT, true);
-        board[6][7] = new Piece(NIGHT, true);
-        board[2][7] = new Piece(BISHOP, true);
-        board[5][7] = new Piece(BISHOP, true);
-        board[3][7] = new Piece(PieceEnum.QUEEN, true);
-        board[4][7] = new Piece(PieceEnum.KING, true);
-    }
-
-    private static void setUpBlacks(Piece[][] board) {
-        for (int i = 0; i < 8; i++) {
-            board[i][1] = new Piece(PieceEnum.PAWN, false);
-        }
-        board[0][0] = new Piece(ROOK, false);
-        board[7][0] = new Piece(ROOK, false);
-        board[1][0] = new Piece(NIGHT, false);
-        board[6][0] = new Piece(NIGHT, false);
-        board[2][0] = new Piece(BISHOP, false);
-        board[5][0] = new Piece(BISHOP, false);
-        board[3][0] = new Piece(PieceEnum.QUEEN, false);
-        board[4][0] = new Piece(PieceEnum.KING, false);
-    }
 
     public static boolean validateMove(Piece[][] board, Move move, boolean currentPlayer) {
         if (!isInBounds(move)) {
-            return false; // board out of bounds
+            return false; //  out of bounds
         }
 
         Piece currentPiece = board[move.getMoveFromX()][move.getMoveFromY()];
         if (currentPiece == null || currentPiece.isWhite() != currentPlayer) {
-            return false; // [No Piece On This Cell] or [it is not the right players' turn]
+            return false; // [No Piece On This Cell or [it is not the right players' turn]
         }
         Piece destination = board[move.getMoveToX()][move.getMoveToY()];
         if (destination != null) { // something is placed on this place
@@ -89,14 +62,53 @@ public class Utils {
         return isValid;
     }
 
-    private static boolean isValidKingMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+    public static boolean isCheckForPlayer(Piece[][] board, boolean player, int kingX, int kingY) {
 
-        return getValidLocationsForKing(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+
+                Piece currentPiece = board[i][j];
+
+                if (currentPiece != null && currentPiece.isWhite() != player) {
+
+                    if (isForced(board, new Move(i, j, kingX, kingY))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
+
+
+    private static void setUpWhites(Piece[][] board) {
+        for (int i = 0; i < 8; i++) {
+            board[i][6] = new Piece(PieceEnum.PAWN, true);
+        }
+        board[0][7] = new Piece(ROOK, true);
+        board[7][7] = new Piece(ROOK, true);
+        board[1][7] = new Piece(NIGHT, true);
+        board[6][7] = new Piece(NIGHT, true);
+        board[2][7] = new Piece(BISHOP, true);
+        board[5][7] = new Piece(BISHOP, true);
+        board[3][7] = new Piece(PieceEnum.QUEEN, true);
+        board[4][7] = new Piece(PieceEnum.KING, true);
+    }
+
+    private static void setUpBlacks(Piece[][] board) {
+        for (int i = 0; i < 8; i++) {
+            board[i][1] = new Piece(PieceEnum.PAWN, false);
+        }
+        board[0][0] = new Piece(ROOK, false);
+        board[7][0] = new Piece(ROOK, false);
+        board[1][0] = new Piece(NIGHT, false);
+        board[6][0] = new Piece(NIGHT, false);
+        board[2][0] = new Piece(BISHOP, false);
+        board[5][0] = new Piece(BISHOP, false);
+        board[3][0] = new Piece(PieceEnum.QUEEN, false);
+        board[4][0] = new Piece(PieceEnum.KING, false);
+    }
+
 
     private static boolean isValidPawnMove(Piece[][] board, Move move) {
         int fromX = move.getMoveFromX();
@@ -105,26 +117,6 @@ public class Utils {
         int toY = move.getMoveToY();
 
         return getValidLocationsForPawn(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
-    }
-
-
-    private static boolean isValidQueenMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-
-        return getValidLocationsForRook(board, new Location(fromX, fromY)).contains(new Location(toX, toY)) ||
-                getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
-    }
-
-    private static boolean isValidBishopMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-
-        return getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidNightMove(Piece[][] board, Move move) {
@@ -136,6 +128,15 @@ public class Utils {
         return getValidLocationsForNight(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
+    private static boolean isValidBishopMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
+    }
+
     private static boolean isValidRookMove(Piece[][] board, Move move) {
         int fromX = move.getMoveFromX();
         int fromY = move.getMoveFromY();
@@ -143,6 +144,25 @@ public class Utils {
         int toY = move.getMoveToY();
 
         return getValidLocationsForRook(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
+    }
+
+    private static boolean isValidQueenMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForRook(board, new Location(fromX, fromY)).contains(new Location(toX, toY)) ||
+                getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
+    }
+
+    private static boolean isValidKingMove(Piece[][] board, Move move) {
+        int fromX = move.getMoveFromX();
+        int fromY = move.getMoveFromY();
+        int toX = move.getMoveToX();
+        int toY = move.getMoveToY();
+
+        return getValidLocationsForKing(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static Set<Location> getValidLocationsForKing(Piece[][] board, Location fromLocation) {
@@ -166,11 +186,9 @@ public class Utils {
         }
 
         if (fromX + 1 <= 7 && fromY - 1 >= 0) {
-
             if (board[fromX + 1][fromY - 1] == null || board[fromX + 1][fromY - 1].isWhite() != currentPiece.isWhite()) {
                 possibleMoveLocation.add(new Location(fromX + 1, fromY - 1));
             }
-
         }
 
         if (fromX + 1 <= 7) {
@@ -467,22 +485,9 @@ public class Utils {
     }
 
 
-    public static boolean isCheckForPlayer(Piece[][] board, boolean player, int kingX, int kingY) {
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                Piece currentPiece = board[i][j];
-                if (currentPiece != null && currentPiece.isWhite() != player) {
-                    if (isForced(board, new Move(i, j, kingX, kingY))) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     private static boolean isForced(Piece[][] board, Move move) {
         PieceEnum otherPlayerPiece = board[move.getMoveFromX()][move.getMoveFromY()].getPieceEnum();
+
         boolean isForced = false;
         switch (otherPlayerPiece) {
             case PAWN:
