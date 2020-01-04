@@ -3,6 +3,7 @@ package com.company.enums;
 public enum GameStatus {
     NOT_STARTED,
     PLAYING,
+    NO_MORE_MOVES,
     CHECK,
     STOPPED_BY_ILLEGAL_MOVE;
 
@@ -19,6 +20,9 @@ public enum GameStatus {
                 break;
             case STOPPED_BY_ILLEGAL_MOVE:
                 str = "Stopped by Illegal Move";
+                break;
+            case NO_MORE_MOVES:
+                str="No More Moves";
                 break;
         }
         return str;
