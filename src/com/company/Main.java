@@ -91,15 +91,14 @@ public class Main extends JPanel {
     }
 
     private void startGame() {
-        statusLabel.setText("The Game had been started");
+        statusLabel.setText("The Game has been started");
         updateLabel(game.getBoard());
 
         try{
             if (currentGameThread!=null){
                 currentGameThread.interrupt();
             }
-        }catch (Exception ign){
-            System.out.println(ign);
+        }catch (Exception ignored){
         }
 
         currentGameThread = new Thread(new GameThread());
@@ -156,8 +155,8 @@ public class Main extends JPanel {
                 try {
                     Thread.sleep(DELAY);
                     updateLabel(game.getBoard());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                   // e.printStackTrace();
                     break;
                 }
             }

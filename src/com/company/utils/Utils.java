@@ -210,7 +210,7 @@ public class Utils {
         }
 
         if (fromX - 1 >= 0 && fromY + 1 <= 7) {
-            if (board[fromX - 1][fromY + 1] == null || board[fromX - 1][fromY - +1].isWhite() != currentPiece.isWhite()) {
+            if (board[fromX - 1][fromY + 1] == null || board[fromX - 1][fromY + 1].isWhite() != currentPiece.isWhite()) {
                 possibleMoveLocation.add(new Location(fromX - 1, fromY + 1));
             }
         }
@@ -390,7 +390,6 @@ public class Utils {
             possibleMoveLocation.add(location);
         }
 
-
         for (int i = fromY - 1; i >= 0; i--) {
             piece = board[fromX][i];
             location = new Location(fromX, i);
@@ -435,7 +434,8 @@ public class Utils {
                 if (board[fromX][fromY - 1] == null && board[fromX][fromY - 2] == null) {
                     possibleMoveLocation.add(new Location(fromX, fromY - 2));
                 }
-            } else if (fromY > 0) {// opportunity to change 1 step forward on the board
+            }
+            if (fromY > 0) {// opportunity to change 1 step forward on the board
                 if (board[fromX][fromY - 1] == null) {
                     possibleMoveLocation.add(new Location(fromX, fromY - 1));
                 }
@@ -460,7 +460,8 @@ public class Utils {
                     possibleMoveLocation.add(new Location(fromX, fromY + 2));
                 }
 
-            } else if (fromY > 0) {// opportunity to change 1 step forward on the board
+            }
+            if (fromY > 0) {// opportunity to change 1 step forward on the board
                 if (board[fromX][fromY + 1] == null) {
                     possibleMoveLocation.add(new Location(fromX, fromY + 1));
                 }
@@ -615,7 +616,6 @@ public class Utils {
         int fromY = move.getFromLocation().getY();
         int toX = move.getToLocation().getX();
         int toY = move.getToLocation().getY();
-
         if (Math.abs(toX - fromX) == Math.abs(toY - fromY)) { // they are on the same diagonal
 
             if (toX < fromX && toY < fromY) { // left top diagonal
@@ -637,7 +637,7 @@ public class Utils {
                     }
                 }
             } else if (fromX > toX && toY > fromY) { // left bottom diagonal
-                for (int i = toX + 1, j = toY + 1; i < fromX && j > fromY; i++, j--) {
+                for (int i = toX + 1, j = toY - 1; i < fromX && j > fromY; i++, j--) {
                     if (board[i][j] != null) {
                         return false;
                     }

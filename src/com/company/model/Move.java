@@ -30,4 +30,12 @@ public class Move {
     public void setToLocation(Location toLocation) {
         this.toLocation = toLocation;
     }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+                "fromLocation=" + fromLocation +
+                ", toLocation=" + toLocation +
+                '}';
+    }
 }
