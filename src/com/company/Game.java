@@ -40,7 +40,8 @@ public class Game {
         try {
             int[] nextMove = this.userInputFile.nextMove();
             if (nextMove == null) {
-                this.isGameOver = true;
+                gameStatus = GameStatus.NO_MORE_MOVES;
+                isGameOver = true;
             } else {
                 Move move = new Move(nextMove);
 
