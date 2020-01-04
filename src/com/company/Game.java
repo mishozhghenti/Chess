@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import static com.company.enums.GameStatus.NOT_STARTED;
 import static com.company.enums.GameStatus.PLAYING;
+import static com.company.utils.Utils.*;
 
 
 public class Game {
@@ -45,11 +46,11 @@ public class Game {
             } else {
                 Move move = new Move(nextMove);
 
-                boolean isValid = Utils.validateMove(board, move, currentPlayer);
+                boolean isValid = validateMove(move, currentPlayer);
 
                 if (!isValid) {
                     // end game
-                    isGameOver= true;
+                    isGameOver = true;
                     gameStatus = GameStatus.STOPPED_BY_ILLEGAL_MOVE;
                     return;
                 }
@@ -59,21 +60,32 @@ public class Game {
 
                 if (isCheck) {
                     // end game
-                    isGameOver=true;
+                    isGameOver = true;
                     gameStatus = GameStatus.CHECK;
                     return;
                 }
                 currentPlayer = !currentPlayer;
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
-    private boolean isCheck() {
-        return Utils.isCheckForPlayer(board, whiteKingLocation) ||
-                Utils.isCheckForPlayer(board, blackKingLocation);
+    public boolean isGameFinished() {
+        return isGameOver;
     }
 
+    public Piece[][] getBoard() {
+        return board;
+    }
+
+    public GameStatus getGameStatus() {
+        return gameStatus;
+    }
+
+    private boolean isCheck() {
+        return isCheckForPlayer(whiteKingLocation) ||
+                isCheckForPlayer(blackKingLocation);
+    }
 
     private void commitMove(Move move) {
         int fromX = move.getFromLocation().getX();
@@ -95,17 +107,64 @@ public class Game {
         board[fromX][fromY] = null;
     }
 
+    private boolean validateMove(Move move, boolean currentPlayer) {
+        if (!isInBounds(move)) {
+            return false; //  out of bounds
+        }
 
-    public boolean isGameFinished() {
-        return isGameOver;
+        Piece currentPiece = board[move.getFromLocation().getX()][move.getFromLocation().getY()];
+        if (currentPiece == null || currentPiece.isWhite() != currentPlayer) {
+            return false; // [No Piece On This Cell or [it is not the right players' turn]
+        }
+        Piece destination = board[move.getToLocation().getX()][move.getToLocation().getY()];
+        if (destination != null) { // something is placed on this place
+            if (destination.isWhite() == currentPiece.isWhite()) { // on the destination cell is placed the same colored piece
+                return false;
+            }
+        }
+
+        PieceEnum piece = currentPiece.getPieceEnum();
+        boolean isValid = true;
+        switch (piece) {
+            case PAWN:
+                isValid = isValidPawnMove(board, move);
+                break;
+            case NIGHT:
+                isValid = isValidNightMove(board, move);
+                break;
+            case BISHOP:
+                isValid = isValidBishopMove(board, move);
+                break;
+            case ROOK:
+                isValid = isValidRookMove(board, move);
+                break;
+            case QUEEN:
+                isValid = isValidQueenMove(board, move);
+                break;
+            case KING:
+                isValid = isValidKingMove(board, move);
+                break;
+        }
+        return isValid;
     }
 
+    private boolean isCheckForPlayer(Location kingLocation) {
+        int kingX = kingLocation.getX();
+        int kingY = kingLocation.getY();
 
-    public Piece[][] getBoard() {
-        return board;
-    }
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
 
-    public GameStatus getGameStatus() {
-        return gameStatus;
+                Piece currentPiece = board[i][j];
+
+                if (currentPiece != null && currentPiece.isWhite() != board[kingX][kingY].isWhite()) {
+
+                    if (isForced(board, new Move(i, j, kingX, kingY))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
