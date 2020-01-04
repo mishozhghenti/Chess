@@ -1,44 +1,33 @@
 package com.company.model;
 
 public class Move {
-    private int moveFromX;
-    private int moveFromY;
-    private int moveToX;
-    private int moveToY;
+    private Location fromLocation;
+    private Location toLocation;
 
     public Move(int[] nextMove) {
-        this.moveFromX = nextMove[0];
-        this.moveFromY = nextMove[1];
-        this.moveToX = nextMove[2];
-        this.moveToY = nextMove[3];
+        this.fromLocation = new Location(nextMove[0], nextMove[1]);
+        this.toLocation = new Location(nextMove[2], nextMove[3]);
     }
 
 
     public Move(int moveFromX, int moveFromY, int moveToX, int moveToY) {
-        this.moveFromX = moveFromX;
-        this.moveFromY = moveFromY;
-        this.moveToX = moveToX;
-        this.moveToY = moveToY;
+        this.fromLocation = new Location(moveFromX, moveFromY);
+        this.toLocation = new Location(moveToX, moveToY);
     }
 
-    public int getMoveFromX() {
-        return moveFromX;
+    public Location getFromLocation() {
+        return fromLocation;
     }
 
-    public int getMoveFromY() {
-        return moveFromY;
+    public void setFromLocation(Location fromLocation) {
+        this.fromLocation = fromLocation;
     }
 
-    public int getMoveToX() {
-        return moveToX;
+    public Location getToLocation() {
+        return toLocation;
     }
 
-    public int getMoveToY() {
-        return moveToY;
-    }
-
-    @Override
-    public String toString() {
-        return "From: " + getMoveFromX() + ":" + getMoveFromY() + " To: " + getMoveToX() + ":" + getMoveToY();
+    public void setToLocation(Location toLocation) {
+        this.toLocation = toLocation;
     }
 }

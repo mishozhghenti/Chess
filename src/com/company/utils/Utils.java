@@ -26,11 +26,11 @@ public class Utils {
             return false; //  out of bounds
         }
 
-        Piece currentPiece = board[move.getMoveFromX()][move.getMoveFromY()];
+        Piece currentPiece = board[move.getFromLocation().getX()][move.getFromLocation().getY()];
         if (currentPiece == null || currentPiece.isWhite() != currentPlayer) {
             return false; // [No Piece On This Cell or [it is not the right players' turn]
         }
-        Piece destination = board[move.getMoveToX()][move.getMoveToY()];
+        Piece destination = board[move.getToLocation().getX()][move.getToLocation().getY()];
         if (destination != null) { // something is placed on this place
             if (destination.isWhite() == currentPiece.isWhite()) { // on the destination cell is placed the same colored piece
                 return false;
@@ -62,14 +62,16 @@ public class Utils {
         return isValid;
     }
 
-    public static boolean isCheckForPlayer(Piece[][] board, boolean player, int kingX, int kingY) {
+    public static boolean isCheckForPlayer(Piece[][] board, Location kingLocation) {
+        int kingX = kingLocation.getX();
+        int kingY = kingLocation.getY();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
 
                 Piece currentPiece = board[i][j];
 
-                if (currentPiece != null && currentPiece.isWhite() != player) {
+                if (currentPiece != null && currentPiece.isWhite() != board[kingX][kingY].isWhite()) {
 
                     if (isForced(board, new Move(i, j, kingX, kingY))) {
                         return true;
@@ -79,7 +81,6 @@ public class Utils {
         }
         return false;
     }
-
 
     private static void setUpWhites(Piece[][] board) {
         for (int i = 0; i < 8; i++) {
@@ -109,58 +110,57 @@ public class Utils {
         board[4][0] = new Piece(PieceEnum.KING, false);
     }
 
-
     private static boolean isValidPawnMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         return getValidLocationsForPawn(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidNightMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         return getValidLocationsForNight(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidBishopMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         return getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidRookMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         return getValidLocationsForRook(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidQueenMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         return getValidLocationsForRook(board, new Location(fromX, fromY)).contains(new Location(toX, toY)) ||
                 getValidLocationsForBishop(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
 
     private static boolean isValidKingMove(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         return getValidLocationsForKing(board, new Location(fromX, fromY)).contains(new Location(toX, toY));
     }
@@ -484,9 +484,8 @@ public class Utils {
         return possibleMoveLocation;
     }
 
-
     private static boolean isForced(Piece[][] board, Move move) {
-        PieceEnum otherPlayerPiece = board[move.getMoveFromX()][move.getMoveFromY()].getPieceEnum();
+        PieceEnum otherPlayerPiece = board[move.getFromLocation().getX()][move.getFromLocation().getY()].getPieceEnum();
 
         boolean isForced = false;
         switch (otherPlayerPiece) {
@@ -497,7 +496,7 @@ public class Utils {
                 isForced = isForcedByRook(board, move);
                 break;
             case NIGHT:
-                isForced = isForcedByNight(board, move);
+                isForced = isForcedByNight(move);
                 break;
             case BISHOP:
                 isForced = isForcedByBishop(board, move);
@@ -506,24 +505,19 @@ public class Utils {
                 isForced = isForcedByQueen(board, move);
                 break;
             case KING:
-                isForced = isForcedByKing(board, move);
+                isForced = isForcedByKing(move);
                 break;
         }
         return isForced;
     }
 
     private static boolean isForcedByPawn(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.PAWN
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
 
         if (pieceForcedBy.isWhite()) {
             return (fromX - 1 == toX && fromY - 1 == toY) ||
@@ -535,31 +529,15 @@ public class Utils {
     }
 
     private static boolean isForcedByRook(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.ROOK
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
         return isRookObstacleFree(board, move);
     }
 
-    private static boolean isForcedByNight(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.NIGHT
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
+    private static boolean isForcedByNight(Move move) {
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
+
         return fromX + 1 == toX && fromY - 2 == toY ||
                 fromX + 2 == toX && fromY - 1 == toY ||
                 fromX + 2 == toX && fromY + 1 == toY ||
@@ -571,52 +549,19 @@ public class Utils {
     }
 
     private static boolean isForcedByBishop(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.BISHOP
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
-
         return isBishopObstacleFree(board, move);
     }
 
     private static boolean isForcedByQueen(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
-
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.QUEEN
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()) {
-            return false;
-        }
         return isBishopObstacleFree(board, move) || isRookObstacleFree(board, move);
     }
 
-    private static boolean isForcedByKing(Piece[][] board, Move move) {
-        if (!isInBounds(move)) {
-            return false;
-        }
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+    private static boolean isForcedByKing(Move move) {
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
-        Piece pieceForcedBy = board[fromX][fromY];
-        Piece pieceForced = board[toX][toY];
-        if (pieceForcedBy == null || pieceForcedBy.getPieceEnum() != PieceEnum.KING
-                || pieceForced == null || pieceForced.isWhite() == pieceForcedBy.isWhite()
-                || pieceForced.getPieceEnum() == PieceEnum.KING) {
-            return false;
-        }
         return fromX - 1 == toX && fromY - 1 == toY ||
                 fromX == toX && fromY - 1 == toY ||
                 fromX + 1 == toX && fromY - 1 == toY ||
@@ -624,18 +569,17 @@ public class Utils {
                 fromX + 1 == toX && fromY + 1 == toY ||
                 fromX == toX && fromY + 1 == toY ||
                 fromX - 1 == toX && fromY + 1 == toY ||
-                fromX - 1 == toX && fromY == toY ||
-                fromX - 1 == toX && fromY - 1 == toY;
+                fromX - 1 == toX && fromY == toY;
     }
 
     private static boolean isRookObstacleFree(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         if (fromX == toX || fromY == toY) { // on vertical or horizontal line
-            // checks fro obstacle between pieces
+            // checks for obstacle between pieces
             if (toX < fromX) {
                 for (int i = toX + 1; i < fromX; i++) {
                     if (board[i][toY] != null) {
@@ -667,12 +611,13 @@ public class Utils {
     }
 
     private static boolean isBishopObstacleFree(Piece[][] board, Move move) {
-        int fromX = move.getMoveFromX();
-        int fromY = move.getMoveFromY();
-        int toX = move.getMoveToX();
-        int toY = move.getMoveToY();
+        int fromX = move.getFromLocation().getX();
+        int fromY = move.getFromLocation().getY();
+        int toX = move.getToLocation().getX();
+        int toY = move.getToLocation().getY();
 
         if (Math.abs(toX - fromX) == Math.abs(toY - fromY)) { // they are on the same diagonal
+
             if (toX < fromX && toY < fromY) { // left top diagonal
                 for (int i = toX + 1, j = toY + 1; i < fromX && j < fromY; i++, j++) {
                     if (board[i][j] != null) { // has 'obstacle' on the diagonal, so we do not have forcing
@@ -704,8 +649,8 @@ public class Utils {
     }
 
     private static boolean isInBounds(Move move) {
-        return (move.getMoveFromX() >= 0 && move.getMoveFromX() < 8 && move.getMoveFromY() >= 0 && move.getMoveFromY() < 8
-                && move.getMoveToX() >= 0 && move.getMoveToX() < 8 && move.getMoveToY() >= 0 && move.getMoveToY() < 8);
+        return (move.getFromLocation().getX() >= 0 && move.getFromLocation().getX() < 8 && move.getFromLocation().getY() >= 0 && move.getFromLocation().getY() < 8
+                && move.getToLocation().getX() >= 0 && move.getToLocation().getX() < 8 && move.getToLocation().getY() >= 0 && move.getToLocation().getY() < 8);
     }
 
 }

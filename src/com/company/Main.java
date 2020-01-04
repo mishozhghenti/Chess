@@ -93,6 +93,15 @@ public class Main extends JPanel {
     private void startGame() {
         statusLabel.setText("The Game had been started");
         updateLabel(game.getBoard());
+
+        try{
+            if (currentGameThread!=null){
+                currentGameThread.interrupt();
+            }
+        }catch (Exception ign){
+            System.out.println(ign);
+        }
+
         currentGameThread = new Thread(new GameThread());
         currentGameThread.start();
     }
@@ -152,7 +161,7 @@ public class Main extends JPanel {
                     break;
                 }
             }
-            statusLabel.setText("Game Finished: ");
+            statusLabel.setText("Game Finished: " + game.getGameStatus());
             Thread.currentThread().interrupt();
         }
     }
