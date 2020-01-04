@@ -6,12 +6,19 @@
 * Maven
 
 
-
 ### Dependencies: 
 * userinput.jar
 
 ### Adding userinput.jar to local maven
     mvn install:install-file -Dfile=libs/userinput.jar -DgroupId=com.whg.userinput  -DartifactId=userinput-engine -Dversion=1.0 -Dpackaging=jar
+
+
+### Library directory:
+*   /libs
+
+### Game records directory:
+ *   /data
+ 
 
 # Overview
 This application provides a solution to simulate two players chess game. It validates and control the process.
