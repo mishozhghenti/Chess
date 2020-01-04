@@ -17,4 +17,4 @@
 # Overview
 This application provides a solution to simulate two players chess game. It validates and control the process.
 At the beginning, it asks to select and open the file which contains a game record.
-After that game/simulation will be started and whenever an invalid move occurs or player gets / gives check game will stop.
+After that game/simulation will be started and whenever an invalid move occurs or player gets / gives check game will be stopped.
