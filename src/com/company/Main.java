@@ -29,7 +29,6 @@ public class Main extends JPanel {
         setUpFrame();
     }
 
-
     private void setUpPieces() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -105,7 +104,6 @@ public class Main extends JPanel {
         currentGameThread.start();
     }
 
-
     private void setUpSize() {
         this.setPreferredSize(new Dimension(Constants.WIDTH, Constants.HEIGHT));
         this.setMinimumSize(new Dimension(Constants.WIDTH, Constants.HEIGHT));
@@ -165,15 +163,7 @@ public class Main extends JPanel {
         }
     }
 
-    private static void createAndShowGui() {
-
-    }
-
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new Main();
-            }
-        });
+        SwingUtilities.invokeLater(() -> new Main());
     }
 }

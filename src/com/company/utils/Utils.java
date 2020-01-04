@@ -12,16 +12,12 @@ import static com.company.enums.PieceEnum.*;
 
 public class Utils {
 
-
     public static Piece[][] setUpBoard() {
         Piece[][] board = new Piece[8][8];
         setUpWhites(board);
         setUpBlacks(board);
         return board;
     }
-
-
-
 
     private static void setUpWhites(Piece[][] board) {
         for (int i = 0; i < 8; i++) {
